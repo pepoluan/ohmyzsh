@@ -95,10 +95,26 @@ function omz_termsupport_preexec {
     fi
   fi
 
-  # cmd name only, or if this is doas/sudo or ssh, the next cmd
+  # Extract cmd name, removing (sub)executor and temporary variable assignments
+  # Also get the target following "make" command, if any
   local _subex
   zstyle -s ':omz' 'subexecutor' _subex
-  local CMD="${1[(wr)^(*=*|${_subex}|_|subex|ssh|mosh|rake|-*)]:gs/%/%%}"
+  local _arr=(${=1})
+  local CMD
+  while [[ -z $CMD ]]; do
+    case ${_arr[1]} in
+      *=*|${_subex}|_|subex|ssh|mosh|rake|-*)
+        _arr=(${_arr:1})
+        ;;
+      make)
+        CMD="${(j: :)_arr[1,2]}"
+        ;;
+      *)
+        CMD="${_arr[1]}";
+        ;;
+    esac
+  done
+  # local CMD="${1[(wr)^(*=*|${_subex}|_|subex|ssh|mosh|rake|-*)]:gs/%/%%}"
   local LINE="${2:gs/%/%%}"
 
   title "$CMD" "%100>...>${LINE}%<<"
