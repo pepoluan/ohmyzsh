@@ -88,3 +88,25 @@ function ekrnl() {
 
 alias 'ekrnl!'="ekrnl set"
 
+function ekrnlc() {
+  cd /usr/src/linux
+  subex make menuconfig
+}
+
+function emlog() {
+  local browser
+  zstyle -s ":omz:plugins:gentoo" "browser" browser
+  if [[ -z $browser ]]; then
+    for browser in elinks links lynx w3m NOTFOUND; do
+      if command -v $browser > /dev/null; then
+        break
+      fi
+    done
+  fi
+  if [[ $browser == NOTFOUND ]]; then
+    print "TUI browser not found!\nSet 'zstyle :omz:plugins:gentoo browser' to explicitly define one."
+    return 1
+  fi
+  $browser "https://gitweb.gentoo.org/repo/gentoo.git/log/${1}?showmsg=1"
+}
+
