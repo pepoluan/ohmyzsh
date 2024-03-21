@@ -30,7 +30,7 @@ alias 'emupw!'="emupw do"
 
 function emch() {
   if [[ -z $1 ]]; then
-    subex emerge -pv --changed-use --deep --tree @world
+    emerge -pv --changed-use --deep --tree @world
   elif [[ $1 == "do" ]]; then
     subex emerge -1v --changed-use --deep @world
   fi
