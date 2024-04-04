@@ -1,4 +1,50 @@
 
+## Provides auto-detection of subexecutor to use
+
+# This is taken from PR#12261; if that PR gets merged, we will delete this
+
+# If in the future a new subexecuter is created, we only need to edit this array
+typeset _KNOWN_SUBEXES=( "doas" "sudo" )
+typeset _SUBEX
+
+function _SetupSubexecutor() {
+  local _i
+  local _cmd
+  zstyle -s ':omz:plugins:gentoo' 'subexecutor' _SUBEX
+  if [[ "$_SUBEX" ]]; then
+    if command -v "$_SUBEX" > /dev/null; then
+      return 0
+    fi
+    print "Cannot find subexecutor '${_SUBEX}'; please check your configuration!" >&2
+    return 1
+  fi
+  for _i in "${_KNOWN_SUBEXES[@]}"; do
+    if command -v "$_i" > /dev/null; then
+      _SUBEX="$_i"
+      break
+    fi
+  done
+  if [[ -z $_SUBEX ]]; then
+    print "oh-my-zsh: cannot auto-detect subexecutor; please specify explicitly using 'zstyle :omz:plugins:gentoo subexecutor'." >&2
+    return 1
+  fi
+  zstyle ':omz:plugins:gentoo' 'subexecutor' "$_SUBEX"
+}
+
+_SetupSubexecutor
+unfunction _SetupSubexecutor
+unset _KNOWN_SUBEXES
+unset _SUBEX
+
+# The function is, in contrast, modifiable by changing the :omz:plugins:gentoo->subexecutor zstyle
+function gsubex() {
+  local _subex
+  zstyle -s ':omz:plugins:gentoo' 'subexecutor' _subex
+  ${_subex} "$@"
+}
+
+# --- Actual functions begin here
+
 function emup() {
   local _do
   if [[ "${1:l}" == "do" ]]; then
@@ -10,9 +56,9 @@ function emup() {
     return 1
   fi
   if [[ $_do ]]; then
-    subex emerge -1v --update --deep "$@"
+    gsubex emerge -1v --update --deep "$@"
   else
-    subex emerge -pv --update --deep --tree "$@"
+    gsubex emerge -pv --update --deep --tree "$@"
   fi
 }
 
@@ -32,7 +78,7 @@ function emch() {
   if [[ -z $1 ]]; then
     emerge -pv --changed-use --deep --tree @world
   elif [[ $1 == "do" ]]; then
-    subex emerge -1v --changed-use --deep @world
+    gsubex emerge -1v --changed-use --deep @world
   fi
 }
 
@@ -45,20 +91,20 @@ function emcln() {
     shift
   fi
   if [[ $_do ]]; then
-    subex emerge --depclean "$@"
+    gsubex emerge --depclean "$@"
   else
-    subex emerge -p --depclean "$@"
+    gsubex emerge -p --depclean "$@"
   fi
 }
 
 alias 'emcln!'="emcln do"
 
 function emsync() {
-  subex emaint sync
+  gsubex emaint sync
 }
 
 function emres() {
-  subex emerge --resume
+  gsubex emerge --resume
 }
 
 function equu() {
@@ -67,20 +113,20 @@ function equu() {
 
 function empresreb() {
   print -P "%F{bold}$(functions empresreb | egrep -v print)%f"
-  subex emerge -1v --deep @preserved-rebuild
+  gsubex emerge -1v --deep @preserved-rebuild
 }
 
 function emmodreb() {
-  subex emerge -1v --deep --with-bdeps=y @module-rebuild
+  gsubex emerge -1v --deep --with-bdeps=y @module-rebuild
 }
 
 function enewsr() {
-  subex eselect news read
+  gsubex eselect news read
 }
 
 function ekrnl() {
   if [[ $1 == "set" ]]; then
-    subex eselect kernel set $2
+    gsubex eselect kernel set $2
   else
     eselect kernel list
   fi
@@ -90,7 +136,7 @@ alias 'ekrnl!'="ekrnl set"
 
 function ekrnlc() {
   cd /usr/src/linux
-  subex make menuconfig
+  gsubex make menuconfig
 }
 
 function emlog() {
