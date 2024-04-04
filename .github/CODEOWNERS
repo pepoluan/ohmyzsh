@@ -3,6 +3,7 @@ plugins/archlinux/                  @ratijas
 plugins/dbt/                        @msempere
 plugins/eza/                        @pepoluan
 plugins/genpass/                    @atoponce
+plugins/gentoo/                     @pepoluan
 plugins/git-lfs/                    @hellovietduc
 plugins/gitfast/                    @felipec
 plugins/react-native                @esthor
@@ -12,6 +13,3 @@ plugins/starship/                   @axieax
 plugins/universalarchive/           @Konfekt
 plugins/wp-cli/                     @joshmedeski
 plugins/zoxide/                     @ajeetdsouza
-
-# Core library owners
-lib/00subexecutor.zsh               @pepoluan
