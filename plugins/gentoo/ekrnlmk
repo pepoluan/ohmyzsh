@@ -1,0 +1,128 @@
+print -P "%B%F{cyan}$0%f - automated kernel builder%b"
+while [[ $1 ]]; do
+  case $1 in
+    --no-pause)
+      local _nopause=1
+      ;;
+    --no-clean)
+      local _noclean=1
+      ;;
+  esac
+  shift
+done
+pushd -q /usr/src/linux
+print "Current kernel  : $(uname -r)"
+local _ver="$(make kernelversion)"
+local _mod="$(awk -F"=" '$1 == "CONFIG_LOCALVERSION" { print substr($2, 2, length($2)-2); end; }' .config)"
+local _rslt
+print "About to compile: ${_ver}${_mod}"
+
+eval '_contq() { local _c; read -r -q "_c?Continue [yN]?"; print ""; if [[ $_c == "n" ]]; then; print -P "%B%F{yellow}ekrnlmk aborted by user.%f%b\n"; return 255; else; return 0; fi; }'
+
+if ! _contq; then
+  unfunction _contq
+  return
+fi
+
+local _sect="\\n%B%F{cyan}###%f"
+
+if [[ -z $_noclean ]]; then
+  print -P "$_sect make clean %F{green}${(l:50::=:)}%f%b\n"
+  print "gsubex make clean\n"
+  _rslt=$?
+  if [[ $_rslt != 0 ]]; then
+    print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
+    return $_rslt
+  fi
+  if [[ -z $_nopause ]]; then
+    if ! _contq; then
+      unfunction _contq
+      return
+    fi
+  fi
+fi
+
+print -P "$_sect make %F{green}${(l:56::=:)}%f%b\n"
+print "gsubex make\n"
+_rslt=$?
+if [[ $_rslt != 0 ]]; then
+  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
+  return $_rslt
+fi
+if [[ -z $_nopause ]]; then
+  if ! _contq; then
+    unfunction _contq
+    return
+  fi
+fi
+
+print -P "$_sect make modules_install %F{green}${(l:40::=:)}%f%b\n"
+print "gsubex make modules_install\n"
+_rslt=$?
+if [[ $_rslt != 0 ]]; then
+  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
+  return $_rslt
+fi
+if [[ -z $_nopause ]]; then
+  if ! _contq; then
+    unfunction _contq
+    return
+  fi
+fi
+
+print -P "$_sect make install %F{green}${(l:48::=:)}%f%b\n"
+local _tmp="$(mktemp -p /boot 2> /dev/null)"
+if [[ $? != 0 || -z $_tmp ]]; then
+  print -P "%B%F{yellow}WARNING: /boot is not writable!%f"
+  if ! _contq; then
+    unfunction _contq
+    return 1
+  fi
+  print -P "%b"
+else
+  gsubex rm "$_tmp"
+fi
+print "gsubex make install\n"
+_rslt=$?
+if [[ $_rslt != 0 ]]; then
+  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
+  return $_rslt
+fi
+if [[ -z $_nopause ]]; then
+  if ! _contq; then
+    unfunction _contq
+    return
+  fi
+fi
+
+print -P "$_sect grub-mkconfig -o /boot/grub/grub.cfg %F{green}${(l:24::=:)}%f%b\n"
+print "gsubex grub-mkconfig -o /boot/grub/grub.cfg\n"
+_rslt=$?
+if [[ $_rslt != 0 ]]; then
+  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
+  return $_rslt
+fi
+if [[ -z $_nopause ]]; then
+  if ! _contq; then
+    unfunction _contq
+    return
+  fi
+fi
+
+print -P "$_sect emmodreb %F{green}${(l:24::=:)}%f%b\n"
+print "emmodreb\n"
+_rslt=$?
+if [[ $_rslt != 0 ]]; then
+  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
+  return $_rslt
+fi
+if [[ -z $_nopause ]]; then
+  if ! _contq; then
+    unfunction _contq
+    return
+  fi
+fi
+
+popd -q
+
+# vim: set ft=zsh:
