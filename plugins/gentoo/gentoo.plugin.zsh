@@ -65,7 +65,7 @@ function emup() {
   if [[ $_do ]]; then
     gsubex emerge -1v --update --deep "$@"
   else
-    gsubex emerge -pv --update --deep --tree "$@"
+    emerge -pv --update --deep --tree "$@"
   fi
 }
 
@@ -100,7 +100,7 @@ function emcln() {
   if [[ $_do ]]; then
     gsubex emerge --depclean "$@"
   else
-    gsubex emerge -p --depclean "$@"
+    emerge -p --depclean "$@"
   fi
 }
 
