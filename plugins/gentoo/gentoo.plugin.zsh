@@ -82,10 +82,10 @@ function emupw() {
 alias 'emupw!'="emupw do"
 
 function emch() {
-  if [[ -z $1 ]]; then
-    emerge -pv --changed-use --deep --tree @world
-  elif [[ $1 == "do" ]]; then
+  if [[ "${1:l}" == "do" ]]; then
     gsubex emerge -1v --changed-use --deep @world
+  else
+    emerge -pv --changed-use --deep --tree @world
   fi
 }
 
@@ -93,7 +93,7 @@ alias 'emch!'="emch do"
 
 function emcln() {
   local _do
-  if [[ $1 == "do" ]]; then
+  if [[ "${1:l}" == "do" ]]; then
     _do=1
     shift
   fi
