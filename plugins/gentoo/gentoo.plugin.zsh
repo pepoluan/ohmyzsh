@@ -165,5 +165,10 @@ function emlog() {
   $browser "https://gitweb.gentoo.org/repo/gentoo.git/log/${1}?showmsg=1"
 }
 
+function edconf() {
+  gsubex dispatch-conf
+}
+
+
 autoload -URz ekrnlmk
 
