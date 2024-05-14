@@ -75,8 +75,9 @@ function emupw() {
   local _do
   if [[ "${1:l}" == "do" ]]; then
     _do="do"
+    shift
   fi
-  emup $_do @world
+  emup $_do @world "$@"
 }
 
 alias 'emupw!'="emupw do"
