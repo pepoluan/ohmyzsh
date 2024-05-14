@@ -122,7 +122,6 @@ function equu() {
 }
 
 function empresreb() {
-  print -P "%F{bold}$(functions empresreb | egrep -v print)%f"
   gsubex emerge -1v --deep @preserved-rebuild
 }
 
