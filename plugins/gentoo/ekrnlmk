@@ -6,6 +6,7 @@ local _rslt
 local _nopause
 local _noclean
 local _noinst
+local _subex
 
 function _print_help() {
   print "\nCompiles & install 'raw' kernel (no initramfs creation), including kernel modules (@module-rebuild)"
@@ -52,17 +53,19 @@ function _stage() {
   done
   print -P "\n%B%F{cyan}###%f ${__title:=${__args[*]}} %F{green}${(l:50::=:)}%f%b\n"
   if [[ $__pre ]]; then
-    if ! $__pre; then
-      return $?
+    $__pre
+    __rslt=$?
+    if [[ $__rslt != 0 ]]; then
+      return $__rslt
     fi
   fi
-  echo gsubex "${__args[@]}"
+  echo $_subex "${__args[@]}"
   __rslt=$?
   if [[ $__rslt != 0 ]]; then
     print -P "%B%F{red}ERROR:${__rslt}%f - ekrnlmk aborted!%b\n"
     return $__rslt
   fi
-  print -P "\n%B%F{green}----------%f %F{cyan}$__title%f finished on %D{%Y-%m-%d %H:%M}"
+  print -P "\n%B%F{green}----------%f %F{cyan}${__title}%f finished on %D{%Y-%m-%d %H:%M}"
   if [[ -z $_nopause ]]; then
     if ! _contq; then
       print -P "%B%F{yellow}ekrnlmk aborted by user.%f%b\n"
@@ -73,7 +76,7 @@ function _stage() {
 }
 
 function _check_boot_writable() {
-  local __tmp="$(gsubex mktemp -p /boot 2> /dev/null)"
+  local __tmp="$($_subex mktemp -p /boot 2> /dev/null)"
   if [[ $? != 0 || -z $__tmp ]]; then
     print -P "%B%F{yellow}WARNING: /boot is not writable!%f"
     if ! _contq; then
@@ -81,18 +84,32 @@ function _check_boot_writable() {
     fi
     print -P "%b"
   else
-    gsubex rm "$__tmp"
+    $_subex rm "$__tmp"
   fi
   return 0
 }
 
-trap 'unset _me _ver _mod _rslt _nopause _noclean _noinst; unfunction _print_help _contq _stage _check_boot_writable; popd -q; trap - EXIT' EXIT
+function _cleanup() {
+  local __rslt=$?
+  unset _me _ver _mod _rslt _nopause _noclean _noinst _subex
+  unfunction _print_help _contq _stage _check_boot_writable _cleanup
+  popd -q
+  trap - EXIT
+  return $__rslt
+}
+
+trap _cleanup EXIT
 
 pushd -q /usr/src/linux
-if ! type gsubex > /dev/null; then
-  print -P "%B%F{red}ERROR:%f need '%F{yellow}gsubex%f' function/alias to be defined!%b"
+if type subex > /dev/null; then
+  _subex="subex"
+elif type gsubex > /dev/null; then
+  _subex="gsubex"
+else
+  print -P "%B%F{red}ERROR:%f need '%F{yellow}subex%f'/'%F{yellow}gsubex%f' function/alias to be defined!%b"
   return 3  # ESRCH
-elif i! [[ -f .config ]]; then
+fi
+if ! [[ -f .config ]]; then
   print -P "%B%F{red}ERROR:%f File '%F{yellow}.config%f' not found!%b"
   return 2  # ENOENT
 fi
