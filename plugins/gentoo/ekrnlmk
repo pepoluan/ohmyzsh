@@ -17,111 +17,117 @@ local _mod="$(awk -F"=" '$1 == "CONFIG_LOCALVERSION" { print substr($2, 2, lengt
 local _rslt
 print "About to compile: ${_ver}${_mod}"
 
-eval '_contq() { local _c; read -r -q "_c?Continue [yN]?"; print ""; if [[ $_c == "n" ]]; then; print -P "%B%F{yellow}ekrnlmk aborted by user.%f%b\n"; return 255; else; return 0; fi; }'
+function _contq() {
+  local _c
+  read -r -q "_c?Continue [yN]?"
+  print -P "%b"
+  if [[ $_c != "y" ]]; then
+    return 255
+  fi
+  return 0
+}
 
 if ! _contq; then
   unfunction _contq
   return
 fi
 
-local _sect="\\n%B%F{cyan}###%f"
-
-if [[ -z $_noclean ]]; then
-  print -P "$_sect make clean %F{green}${(l:50::=:)}%f%b\n"
-  print "gsubex make clean\n"
-  _rslt=$?
-  if [[ $_rslt != 0 ]]; then
-    print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
-    return $_rslt
+function _stage() {
+  local __args=()
+  local __pre
+  local __title
+  while [[ $1 ]]; do
+    case "$1" in
+      pre=*)
+        __pre="${1:4}"
+        ;;
+      title=*)
+        __title="${1:6}"
+        ;;
+      *)
+        __args+=( "$1" )
+    esac
+    shift
+  done
+  if [[ -z %__title ]]; then
+    __title="${__args[@]}"
   fi
-  if [[ -z $_nopause ]]; then
-    if ! _contq; then
-      unfunction _contq
-      return
+  local __rslt
+  print -P "\n%B%F{cyan}###%f $__title %F{green}${(l:50::=:)}%f%b\n"
+  if [[ $__pre ]]; then
+    if ! $__pre; then
+      return 255
     fi
   fi
+  gsubex "$@"
+  __rslt=$?
+  if [[ $__rslt != 0 ]]; then
+    print -P "%B%F{red}ERROR:${__rslt}%f - ekrnlmk aborted!%b\n"
+    return $__rslt
+  fi
+  if [[ -z $_nopause ]]; then
+    print -P "\n%B%F{green}----------%f %F{cyan}$1 $2%f finished on %D{%Y-%m-%d %H:%M }"
+    if ! _contq; then
+      print -P "%B%F{yellow}ekrnlmk aborted by user.%f%b\n"
+      unfunction _contq
+      return 255
+    fi
+  fi
+  return 0
+}
+
+if ! _stage make clean; then
+  unfunction _stage
+  return
 fi
 
-print -P "$_sect make %F{green}${(l:56::=:)}%f%b\n"
-print "gsubex make\n"
-_rslt=$?
-if [[ $_rslt != 0 ]]; then
-  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
-  return $_rslt
-fi
-if [[ -z $_nopause ]]; then
-  if ! _contq; then
-    unfunction _contq
-    return
-  fi
+if ! _stage make; then
+  unfunction _stage
+  return
 fi
 
-print -P "$_sect make modules_install %F{green}${(l:40::=:)}%f%b\n"
-print "gsubex make modules_install\n"
-_rslt=$?
-if [[ $_rslt != 0 ]]; then
-  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
-  return $_rslt
-fi
-if [[ -z $_nopause ]]; then
-  if ! _contq; then
-    unfunction _contq
-    return
-  fi
+if ! _stage make modules_install; then
+  unfunction _stage
+  return
 fi
 
-print -P "$_sect make install %F{green}${(l:48::=:)}%f%b\n"
-local _tmp="$(mktemp -p /boot 2> /dev/null)"
-if [[ $? != 0 || -z $_tmp ]]; then
-  print -P "%B%F{yellow}WARNING: /boot is not writable!%f"
-  if ! _contq; then
-    unfunction _contq
-    return 1
+function _check_boot_writable() {
+  local __tmp="$(gsubex mktemp -p /boot 2> /dev/null)"
+  if [[ $? != 0 || -z $__tmp ]]; then
+    print -P "%B%F{yellow}WARNING: /boot is not writable!%f"
+    if ! _contq; then
+      unfunction _contq
+      return 255
+    fi
+    print -P "%b"
+  else
+    gsubex rm "$__tmp"
   fi
-  print -P "%b"
-else
-  gsubex rm "$_tmp"
-fi
-print "gsubex make install\n"
-_rslt=$?
+  return 0
+}
+
+_stage "pre=_check_boot_writable" make install
+_rslt="$?"
+unfunction _check_boot_writable
 if [[ $_rslt != 0 ]]; then
-  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
-  return $_rslt
-fi
-if [[ -z $_nopause ]]; then
-  if ! _contq; then
-    unfunction _contq
-    return
-  fi
+  unfunction _stage
+  return
 fi
 
-print -P "$_sect grub-mkconfig -o /boot/grub/grub.cfg %F{green}${(l:24::=:)}%f%b\n"
-print "gsubex grub-mkconfig -o /boot/grub/grub.cfg\n"
-_rslt=$?
-if [[ $_rslt != 0 ]]; then
-  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
-  return $_rslt
-fi
-if [[ -z $_nopause ]]; then
-  if ! _contq; then
-    unfunction _contq
-    return
-  fi
+if ! _stage grub-mkconfig -o /boot/grub/grub.cfg; then
+  unfunction _stage
+  return
 fi
 
-print -P "$_sect emmodreb %F{green}${(l:24::=:)}%f%b\n"
-print "emmodreb\n"
-_rslt=$?
-if [[ $_rslt != 0 ]]; then
-  print -P "%B%F{red}ERROR:${_rslt}%f - ekrnlmk aborted!%b\n"
-  return $_rslt
+if ! _stage emmodreb; then
+  unfunction _stage
+  return
 fi
-if [[ -z $_nopause ]]; then
-  if ! _contq; then
-    unfunction _contq
-    return
-  fi
-fi
+
+print -P "\m%B%F{green}==========%f ekrnlmk Done %F{green}==========%f%b\n"
+
+unfunction _stage
+unfunction _contq
 
 popd -q
 
