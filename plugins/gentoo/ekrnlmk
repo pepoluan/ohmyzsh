@@ -19,6 +19,13 @@ function _print_help() {
 }
 
 function _contq() {
+  # Ask confirmation of continuation
+  #
+  # Syntax:
+  #     _contq [NRETVAL]
+  #
+  # NRETVAL = return value if user does not confirm. Defaults to 255
+  #
   local __c
   print -Pn "%B%F{yellow}"
   read -r -q "__c?Continue [yN]?"
@@ -30,6 +37,14 @@ function _contq() {
 }
 
 function _stage() {
+  # Performs a stage
+  #
+  # Syntax:
+  #     _stage [title=TITLE] [pre=PRESTAGE] args ...
+  #
+  # TITLE    = custom title (if not set, uses the args)
+  # PRESTAGE = a command / function to be executed successfully before the args are executed
+  #
   local __args=()
   local __pre
   local __title
@@ -100,20 +115,9 @@ function _cleanup() {
 
 trap _cleanup EXIT
 
-pushd -q /usr/src/linux
-if type subex > /dev/null; then
-  _subex="subex"
-elif type gsubex > /dev/null; then
-  _subex="gsubex"
-else
-  print -P "%B%F{red}ERROR:%f need '%F{yellow}subex%f'/'%F{yellow}gsubex%f' function/alias to be defined!%b"
-  return 3  # ESRCH
-fi
-if ! [[ -f .config ]]; then
-  print -P "%B%F{red}ERROR:%f File '%F{yellow}.config%f' not found!%b"
-  return 2  # ENOENT
-fi
+# {{{ Parse CLI opions
 
+pushd -q /usr/src/linux
 print -P "%B%F{cyan}${_me}%f - automated kernel builder & installer%b"
 while [[ $1 ]]; do
   case $1 in
@@ -134,6 +138,27 @@ while [[ $1 ]]; do
   shift
 done
 
+# }}}
+
+# {{{ Check Prerequisites
+
+if type subex > /dev/null; then
+  _subex="subex"
+elif type gsubex > /dev/null; then
+  _subex="gsubex"
+else
+  print -P "%B%F{red}ERROR:%f need '%F{yellow}subex%f'/'%F{yellow}gsubex%f' function/alias to be defined!%b"
+  return 3  # ESRCH
+fi
+if ! [[ -f .config ]]; then
+  print -P "%B%F{red}ERROR:%f File '%F{yellow}.config%f' not found!%b"
+  return 2  # ENOENT
+fi
+
+# }}}
+
+# {{{ Compilation Stages
+
 print ""
 print -P "Current kernel  : %B$(uname -r)%b"
 _ver="$(make kernelversion)"
@@ -150,6 +175,10 @@ fi
 if ! _stage make; then
   return $?
 fi
+
+# }}}
+
+# {{{ Installation Stages
 
 if [[ -z $_noinst ]]; then
 
@@ -171,7 +200,9 @@ if [[ -z $_noinst ]]; then
 
 fi
 
+# }}}
+
 print -P "\n%B%F{green}==========%f $_me Done %F{green}==========%f%b\n"
 
 
-# vim: set ft=zsh:
+# vim: set ft=zsh foldmethod=marker:
