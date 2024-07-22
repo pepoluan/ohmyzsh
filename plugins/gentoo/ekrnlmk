@@ -74,7 +74,7 @@ function _stage() {
       return $__rslt
     fi
   fi
-  echo $_subex "${__args[@]}"
+  $_subex "${__args[@]}"
   __rslt=$?
   if [[ $__rslt != 0 ]]; then
     print -P "%B%F{red}ERROR:${__rslt}%f - ekrnlmk aborted!%b\n"
