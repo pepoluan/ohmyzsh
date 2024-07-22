@@ -51,9 +51,7 @@ The following commands in the table below has no variants, they execute immediat
 
 | Command     | Purpose                                             | Notes |
 |:-----------:|-----------------------------------------------------|:-----:|
-| `ekrnl`     | eselect kernel list                                 |       |
-| `ekrnl set` | eselect kernel set                                  |  [1]  |
-| `ekrnl!`    | alias of `ekrnl set`                                |  [1]  |
+| `ekrnl`     | eselect kernel list/set                             |  [2]  |
 | `ekrnlc`    | `make menuconfig` in kernel dir                     |  [1]  |
 | `ekrnlmk`   | Build (and install) kernel dir                      |  [1]  |
 | `emlog`     | Invokes a TUI browser to see a package's commit log |       |
@@ -66,5 +64,6 @@ The following commands in the table below has no variants, they execute immediat
 
 **Notes:**
 
-**[1]** Automatically invokes subexecutor
+**[1]** Automatically invokes subexecutor  
+**[2]** Without args, invokes 'list' command. With args, invokes 'set' command (automatically invokes subexecutor)  
 

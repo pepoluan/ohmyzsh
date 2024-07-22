@@ -134,14 +134,12 @@ function enewsr() {
 }
 
 function ekrnl() {
-  if [[ $1 == "set" ]]; then
-    gsubex eselect kernel set $2
+  if [[ $1 ]]; then
+    gsubex eselect kernel set $1
   else
     eselect kernel list
   fi
 }
-
-alias 'ekrnl!'="ekrnl set"
 
 function ekrnlc() {
   cd /usr/src/linux
