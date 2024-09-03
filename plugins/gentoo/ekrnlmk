@@ -194,7 +194,7 @@ if [[ -z $_noinst ]]; then
     return $?
   fi
 
-  if ! _stage emmodreb; then
+  if ! _stage emerge @module-rebuild; then
     return $?
   fi
 
