@@ -51,6 +51,7 @@ The following commands in the table below has no variants, they execute immediat
 
 | Command     | Purpose                                             | Notes |
 |:-----------:|-----------------------------------------------------|:-----:|
+| `edconf`    | dispatch-conf                                       |  [1]  |
 | `ekrnl`     | eselect kernel list/set                             |  [2]  |
 | `ekrnlc`    | `make menuconfig` in kernel dir                     |  [1]  |
 | `ekrnlmk`   | Build (and install) kernel dir                      |  [1]  |
