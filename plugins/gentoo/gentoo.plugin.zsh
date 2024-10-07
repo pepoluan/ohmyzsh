@@ -142,8 +142,42 @@ function ekrnl() {
 }
 
 function ekrnlc() {
+  local __c
+  # First check that this is writable
+  local __t="$(mktemp -q -p /usr/src/linux)"
+  if [[ -z $__t ]]; then
+    print -P "$B$F{yellow}/usr/src/linux is not writable!%f"
+    print -P "You should do a $F{cyan}chown%f first to ensure successful config & compile"
+    read -r -q "__c?Continue [yN] ? "
+    print -P "%f%b"
+    if [[ $__c != "y" ]]; then
+      return 1
+    fi
+  else
+    rm "$__t"
+  fi
   cd /usr/src/linux
-  gsubex make menuconfig
+  if ! [[ -r .config ]]; then
+    print -P "%B%F{yellow}.config is not found!%f"
+    print -P "Possible options:"
+    print -P "  %F{yellow}a%f = Abort, so you can handle things on your own"
+    print -P "  %F{yellow}c%f = Continue, make menuconfig *should* create an empty, default .config file"
+    print -P "  %F{yellow}o%f = Run %F{cyan}make oldconfig%f, which will copy your current kernel config and run the oldconfig procedure"
+    read -r -k1 "__c?Choice [Aco] ? "
+    print -P "${(L)__c}%f%b"
+    case ${(L)__c} in
+      o)
+        make oldconfig
+        ;;
+      c)
+        __c="c"
+        ;;
+      *)
+        return 1
+        ;;
+    esac
+  fi
+  make menuconfig
 }
 
 function emlog() {
