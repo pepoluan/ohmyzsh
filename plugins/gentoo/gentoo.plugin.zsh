@@ -77,16 +77,17 @@ function emupw() {
     _do="do"
     shift
   fi
-  emup $_do @world "$@"
+  emup $_do "$@" "@world"
 }
 
 alias 'emupw!'="emupw do"
 
 function emch() {
   if [[ "${1:l}" == "do" ]]; then
-    gsubex emerge -1v --changed-use --deep @world
+    shift
+    gsubex emerge -1v --changed-use --deep "$@" @world
   else
-    emerge -pv --changed-use --deep --tree @world
+    emerge -pv --changed-use --deep --tree "$@" @world
   fi
 }
 
@@ -122,11 +123,11 @@ function equu() {
 }
 
 function empresreb() {
-  gsubex emerge -1v --deep @preserved-rebuild
+  gsubex emerge -1v --deep "$@" @preserved-rebuild
 }
 
 function emmodreb() {
-  gsubex emerge -1v --deep --with-bdeps=y @module-rebuild
+  gsubex emerge -1v --deep --with-bdeps=y "$@" @module-rebuild
 }
 
 function enewsr() {
