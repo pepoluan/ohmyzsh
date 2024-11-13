@@ -109,11 +109,11 @@ alias 'emcln!'="emcln do"
 
 ## Non Tri-variant commands
 
-function emsync() {
+function 'emsync!'() {
   gsubex emaint sync
 }
 
-function emres() {
+function 'emres!'() {
   gsubex emerge --resume
 }
 
@@ -121,19 +121,19 @@ function equu() {
   equery u "$@"
 }
 
-function empresreb() {
+function 'empresreb!'() {
   gsubex emerge -1v --deep "$@" @preserved-rebuild
 }
 
-function emmodreb() {
+function 'emmodreb!'() {
   gsubex emerge -1v --deep --with-bdeps=y "$@" @module-rebuild
 }
 
-function enewsr() {
+function 'enewsr!'() {
   gsubex eselect news read
 }
 
-function ekrnl() {
+function 'ekrnl!'() {
   if [[ $1 ]]; then
     gsubex eselect kernel set $1
   else
@@ -197,7 +197,7 @@ function emlog() {
   $browser "https://gitweb.gentoo.org/repo/gentoo.git/log/${1}?showmsg=1"
 }
 
-function edconf() {
+function 'edconf!'() {
   gsubex dispatch-conf
 }
 
