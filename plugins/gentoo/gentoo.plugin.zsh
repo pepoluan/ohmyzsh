@@ -21,7 +21,7 @@ function _SetupSubexecutor() {
     if command -v "$_subex" > /dev/null; then
       return 0
     fi
-    print "Cannot find subexecutor '${_subex}'; please check your configuration!" >&2
+    print -P "%F{red}ERROR:%f Cannot find subexecutor '${_subex}'; please check your configuration!" >&2
     return 1
   fi
   for _i in "${_KNOWN_SUBEXES[@]}"; do
@@ -31,7 +31,7 @@ function _SetupSubexecutor() {
     fi
   done
   if [[ -z $_subex ]]; then
-    print "oh-my-zsh: cannot auto-detect subexecutor; please specify explicitly using 'zstyle :omz:plugins:gentoo subexecutor'." >&2
+    print -P "%F{red}ERROR:%f oh-my-zsh: cannot auto-detect subexecutor; please specify explicitly using 'zstyle :omz:plugins:gentoo subexecutor'." >&2
     return 1
   fi
   zstyle ':omz:plugins:gentoo' 'subexecutor' "$_subex"
@@ -175,7 +175,7 @@ function emlog() {
     done
   fi
   if [[ $browser == NOTFOUND ]]; then
-    print "TUI browser not found!\nSet 'zstyle :omz:plugins:gentoo browser' to explicitly define one."
+    print -P "%F{red}ERROR:%f TUI browser not found!\nSet 'zstyle :omz:plugins:gentoo browser' to explicitly define one."
     return 1
   fi
   $browser "https://gitweb.gentoo.org/repo/gentoo.git/log/${1}?showmsg=1"
