@@ -202,5 +202,5 @@ function 'edconf!'() {
 }
 
 
-autoload -URz ekrnlmk
+autoload -URz 'ekrnlmk!'
 
