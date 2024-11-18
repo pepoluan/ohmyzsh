@@ -49,65 +49,49 @@ function gsubex() {
 
 # --- Actual implementation of helper functions and aliases ----------
 
-## Tri-variant commands
-
-function emup() {
-  local _do
-  if [[ "${1:l}" == "do" ]]; then
-    _do=1
-    shift
-  fi
-  if [[ -z $1 ]]; then
-    print "emup needs one or more packages to be specified." >&2
-    return 1
-  fi
-  if [[ $_do ]]; then
-    gsubex emerge -1v --update --deep "$@"
-  else
-    emerge -pv --update --deep --tree "$@"
-  fi
+function _err_need_pkgs() {
+  print -P "%F{red}ERROR:%f %B${1}%b needs one or more packages to be specified." >&2
 }
 
-alias 'emup!'="emup do"
+function emup() {
+  if [[ -z $1 ]]; then
+    _err_need_pkgs "$0"
+    return 1
+  fi
+  emerge -pv --update --deep --tree "$@"
+}
+
+function 'emup!'() {
+  if [[ -z $1 ]]; then
+    _err_need_pkgs "$0"
+    return 1
+  fi
+  gsubex emerge -1v --update --deep "$@"
+}
 
 function emupw() {
-  local _do
-  if [[ "${1:l}" == "do" ]]; then
-    _do="do"
-    shift
-  fi
   emup $_do "$@" "@world"
 }
 
-alias 'emupw!'="emupw do"
+function 'emupw!'() {
+  emup! "$@" "@world"
+}
 
 function emch() {
-  if [[ "${1:l}" == "do" ]]; then
-    shift
-    gsubex emerge -1v --changed-use --deep "$@" @world
-  else
-    emerge -pv --changed-use --deep --tree "$@" @world
-  fi
+  emerge -pv --changed-use --deep --tree "$@" @world
 }
 
-alias 'emch!'="emch do"
+function 'emch!'() {
+  gsubex emerge -1v --changed-use --deep "$@" @world
+}
 
 function emcln() {
-  local _do
-  if [[ "${1:l}" == "do" ]]; then
-    _do=1
-    shift
-  fi
-  if [[ $_do ]]; then
-    gsubex emerge --depclean "$@"
-  else
-    emerge -p --depclean "$@"
-  fi
+  emerge -p --depclean "$@"
 }
 
-alias 'emcln!'="emcln do"
-
-## Non Tri-variant commands
+function 'emcln!'() {
+  gsubex emerge --depclean "$@"
+}
 
 function 'emsync!'() {
   gsubex emaint sync
