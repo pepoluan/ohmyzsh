@@ -98,7 +98,7 @@ function 'emsync!'() {
 }
 
 function 'emres!'() {
-  gsubex emerge --resume
+  gsubex emerge --resume "$@"
 }
 
 function equu() {
