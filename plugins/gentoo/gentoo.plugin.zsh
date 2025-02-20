@@ -70,7 +70,7 @@ function 'emup!'() {
 }
 
 function emupw() {
-  emup $_do "$@" "@world"
+  emup "$@" "@world"
 }
 
 function 'emupw!'() {
