@@ -193,6 +193,6 @@ fi
 # }}}
 
 print -P "\n%B%F{green}==========%f $_me Done %F{green}==========%f%b\n"
-
+_cleanup
 
 # vim: set ft=zsh foldmethod=marker:
