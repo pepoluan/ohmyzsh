@@ -40,7 +40,7 @@ function _stage() {
   # Performs a stage
   #
   # Syntax:
-  #     _stage [title=TITLE] [pre=PRESTAGE] args ...
+  #     _stage [-title TITLE] [-pre PRESTAGE] args ...
   #
   # TITLE    = custom title (if not set, uses the args)
   # PRESTAGE = a command / function to be executed successfully before the args are executed
@@ -49,23 +49,13 @@ function _stage() {
   local __pre
   local __title
   local __rslt
-  while [[ $1 ]]; do
-    # The '/*=/' means substitute everything from start up to and including the equals '=' sign, with nothing
-    # In other words, deleting from start up to and including the first equals sign.
-    # This removes the need to count number of chars, which is kind of fragile.
-    case "$1" in
-      pre=*)
-        __pre="${1/*=/}"
-        ;;
-      title=*)
-        __title="${1/*=/}"
-        ;;
-      *)
-        __args+=( "$1" )
-        ;;
-    esac
-    shift
-  done
+  zmodload zsh/zutil
+  zparseopts -D -E -- title:=__title pre:=__pre
+  # Flatten
+  __title="${__title[*]}"
+  __pre="${__pre[*]}"
+  # Copy
+  __args=( "$@" )
   print -P "\n%B%F{cyan}###%f ${__title:=${__args[*]}} %F{green}${(l:50::=:)}%f%b\n"
   if [[ $__pre ]]; then
     $__pre
@@ -186,11 +176,11 @@ if [[ -z $_noinst ]]; then
     return $?
   fi
 
-  if ! _stage pre="_check_boot_writable" make install; then
+  if ! _stage -pre "_check_boot_writable" make install; then
     return $?
   fi
 
-  if ! _stage title="grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
+  if ! _stage -title "grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
     return $?
   fi
 
