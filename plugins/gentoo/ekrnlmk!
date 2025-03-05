@@ -187,7 +187,7 @@ if [[ -z $_noinst ]]; then
     return $?
   fi
 
-  if ! _stage -title "grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
+  if ! _stage -pre "_check_boot_writable" -title "grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
     return $?
   fi
 
