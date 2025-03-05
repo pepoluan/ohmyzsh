@@ -51,16 +51,15 @@ function _stage() {
   # TITLE    = custom title (if not set, uses the args)
   # PRESTAGE = a command / function to be executed successfully before the args are executed
   #
+  local __opts
   local __args=()
   local __pre
   local __title
   local __rslt
   zmodload zsh/zutil
-  zparseopts -D -E -- title:=__title pre:=__pre
-  # Flatten
-  __title="${__title[*]}"
-  __pre="${__pre[*]}"
-  # Copy
+  zparseopts -D -E -A __opts -- title: pre:
+  __title="${__opts[-title]}"
+  __pre="${__opts[-pre]}"
   __args=( "$@" )
   print -P "\n%B%F{cyan}###%f ${__title:=${__args[*]}} %F{green}${(l:50::=:)}%f%b\n"
   if [[ $__pre ]]; then
