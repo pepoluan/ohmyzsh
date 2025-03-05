@@ -1,4 +1,6 @@
 
+# {{{ Local-global vars
+
 local _me="$0"
 local _ver
 local _mod
@@ -7,6 +9,10 @@ local _nopause
 local _noclean
 local _noinst
 local _subex
+
+# }}}
+
+# {{{ Helper functions
 
 function _print_help() {
   print "\nCompiles & install 'raw' kernel (no initramfs creation), including kernel modules (@module-rebuild)"
@@ -105,6 +111,8 @@ function _cleanup() {
 
 trap _cleanup EXIT
 
+# }}}
+
 # {{{ Parse CLI opions
 
 pushd -q /usr/src/linux
@@ -195,4 +203,4 @@ fi
 print -P "\n%B%F{green}==========%f $_me Done %F{green}==========%f%b\n"
 _cleanup
 
-# vim: set ft=zsh foldmethod=marker:
+# vim: set ft=zsh foldmethod=marker foldlevel=0:
