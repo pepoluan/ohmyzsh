@@ -34,7 +34,7 @@ function _contq() {
   #
   local __c
   print -Pn "%B%F{yellow}"
-  read -r -q "__c?Continue [yN]?"
+  read "__c?Continue [yN]? "
   print -P "%f%b"
   if [[ $__c != "y" ]]; then
     return ${1:-255}
