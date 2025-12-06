@@ -33,38 +33,63 @@ Default: Not Set
 
 ## Aliases / Functions / Commands
 
-The following commands in the table below has three variants:
+In general:
 
-* **Command** (on its own) : Execute command with `-p`/`--pretend` flag
-* **Command `do`** : Execute command -- will invoke subexecutor
-* **Command!**: An alias to `command do`
+* Commands without `!` suffix means it can run as low-privilege user.  
+  This usually means the `--pretend|-p` option will be passed through to the command.
 
-| Command     | Purpose                     | Notes |
-|:-----------:|-----------------------------|:-----:|
-| `emch`      | emerge changed-use `@world` |       |
-| `emcln`     | emerge depclean             |       |
-| `emup`      | emerge update               |       |
-| `emupw`     | emerge update `@world`      |       |
+* Commands with `!` suffix means it will invoke the subexecutor.  
+  This usually also means `--pretend|-p` will be removed.
+
+* Some commands have two variants: with `!`, and without.
+
+In the following table, commands without `!` mean they have two variants, unless noted.
+Commands with `!` have only one variant
 
 
-The following commands in the table below has no variants, they execute immediately:
+| Command      | Purpose / Is similar to                                 | Notes |
+|:-------------|---------------------------------------------------------|:-----:|
+| `edconf!`    | `dispatch-conf`                                         |       |
+| `ekrnl`      | (See below)                                             |       |
+| `ekrnlc`     | (See below)                                             |  [1]  |
+| `ekrnlmk!`   | (See below)                                             |       |
+| `emch`       | `emerge -pvDt --changed-use [OPTIONS] @world`           |  [2]  |
+| `emcln`      | `emerge -p --depclean`                                  |       |
+| `emlog`      | Invokes a TUI browser to see a package's commit log     |  [1]  |
+| `emmodreb!`  | `emerge -1vD --with-bdeps=y [OPTIONS] @module-rebuild`  |  [2]  |
+| `empresreb!` | `emerge -1vD [OPTIONS] @preserved-rebuild`              |  [2]  |
+| `emres!`     | `emerge --resume`                                       |       |
+| `emsync!`    | `emaint sync`                                           |       |
+| `emup`       | `emerge -pvuDt`                                         |       |
+| `emupw`      | `emup [OPTIONS] @world`                                 |  [2]  |
+| `enewsr!`    | `eselect news read`                                     |       |
+| `equu`       | `equery uses`                                           |  [1]  |
 
-| Command     | Purpose                                             | Notes |
-|:-----------:|-----------------------------------------------------|:-----:|
-| `edconf`    | dispatch-conf                                       |  [1]  |
-| `ekrnl`     | eselect kernel list/set                             |  [2]  |
-| `ekrnlc`    | `make menuconfig` in kernel dir                     |  [1]  |
-| `ekrnlmk`   | Build (and install) kernel dir                      |  [1]  |
-| `emlog`     | Invokes a TUI browser to see a package's commit log |       |
-| `emmodreb`  | emerge `@module-rebuild`                            |  [1]  |
-| `empresreb` | emerge `@preserved-rebuild`                         |  [1]  |
-| `emres`     | emerge resume                                       |  [1]  |
-| `emsync`    | emaint sync                                         |  [1]  |
-| `enewsr`    | eselect news read                                   |       |
-| `equu`      | equery use                                          |       |
+
 
 **Notes:**
 
-**[1]** Automatically invokes subexecutor  
-**[2]** Without args, invokes 'list' command. With args, invokes 'set' command (automatically invokes subexecutor)  
+**[1]** These commands have only one variant.  
+**[2]** Unlike other commands that append your arguments to the end, these commands INSERT your arguments within, at the position marked with the `[OPTIONS]` notation.
 
+### The `ekrnl` command:
+
+* WithOUT `!`, it will execute `eselect kernel list`, a non-privileged command
+* WITH `!` it depends on the argument
+  * WithOUT additional argument: Same as `ekrnl`
+  * WITH an argument (must be a number): Execute `eselect kernel set` via subexecutor
+
+
+### The `ekrnlc` command:
+
+This command will run `make menuconfig` _as the currently logged in user_ (NOT as a privileged user)
+for the currently selected kernel, after checking for the following pre-requisites:
+
+* The `/usr/src/linux` directory is RW for the current user
+* The `.config` file exists in the above directory
+
+If the above pre-requisites are not met, it will ask for confirmation and suggest possible fixes.
+
+### The `ekrnlmk!` command:
+
+Performs the compile + install process for the selected kernel.
