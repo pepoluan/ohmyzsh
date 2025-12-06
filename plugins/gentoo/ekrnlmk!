@@ -49,7 +49,7 @@ function _stage() {
   #     _stage [-title TITLE] [-pre PRESTAGE] args ...
   #
   # TITLE    = custom title (if not set, uses the args)
-  # PRESTAGE = a command / function to be executed successfully before the args are executed
+  # PRESTAGE = a command / function to be executed successfully before the args are executed. MUST BE A SINGLE WORD.
   #
   local __opts
   local __args=()
