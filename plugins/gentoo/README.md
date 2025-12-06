@@ -94,7 +94,7 @@ If the above pre-requisites are not met, it will ask for confirmation and sugges
 
 ### The `ekrnlmk!` command:
 
-Performs the compile + install process for the selected kernel.
+Performs the compile + install process for the selected kernel, INCLUDING compilation of kernel modules, if any.
 
 It supports several options/switches, which you can read by running `ekrnlmk! --help`.
 The most helpful one is probably `--no-clean` which skips the `make clean` stage,
