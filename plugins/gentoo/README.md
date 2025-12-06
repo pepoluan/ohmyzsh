@@ -8,7 +8,7 @@ Provides aliases and functions to assist day-to-day Gentoo maintenance.
 All configuration is done in the `:omz:plugin:gentoo` namespace using the command:
 
 ```
-zstype :omz:plugin:gentoo <knob>
+zstyle :omz:plugin:gentoo <knob>
 ```
 
 ### `browser`
