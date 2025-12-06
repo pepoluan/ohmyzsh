@@ -26,9 +26,9 @@ try to detect automatically, prioritizing `doas` over `sudo`
 
 Default: Not Set
 
-> **Note:** This configuration knob will be removed when
-> [PR#12261](https://github.com/ohmyzsh/ohmyzsh/pull/12261)
-> have been merged.
+> **Note:** This configuration knob will be removed when a way to globally specify a custom subexecutor has been implemented.
+>
+> I did try submitting [PR#12261](https://github.com/ohmyzsh/ohmyzsh/pull/12261) but the PR had been closed.
 
 
 ## Aliases / Functions / Commands
