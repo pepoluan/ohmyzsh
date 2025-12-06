@@ -123,7 +123,7 @@ function _check_boot_writable() {
 function _cleanup() {
   local __rslt=$?
   unset _me _ver _mod _rslt _nopause _noclean _noinst _subex
-  unfunction _print_help _contq _stage _check_boot_writable _cleanup
+  unfunction _print_help _contq _stage _check_boot_writable _cleanup _ekrnlmk_main
   popd -q
   trap - EXIT
   return $__rslt
@@ -175,47 +175,62 @@ fi
 
 # }}}
 
-# {{{ Compilation Stages
+# {{{ main()
 
-print ""
-print -P "Current kernel  : %B$(uname -r)%b"
-_ver="$(make kernelversion)"
-_mod="$(awk -F"=" '$1 == "CONFIG_LOCALVERSION" { print substr($2, 2, length($2)-2); end; }' .config)"
-print -P "About to compile: %B${_ver}${_mod}%b"
-if ! _contq 125; then
-  return $?
-fi
+function _ekrnlmk_main() {
+  # {{{ Compilation Stages
 
-if ! _stage -next "make"  make clean; then
-  return $?
-fi
-
-if ! _stage -next "make modules_install" make; then
-  return $?
-fi
-
-# }}}
-
-# {{{ Installation Stages
-
-if [[ -z $_noinst ]]; then
-
-  if ! _stage -next "make install" make modules_install; then
+  print ""
+  print -P "Current kernel  : %B$(uname -r)%b"
+  _ver="$(make kernelversion)"
+  _mod="$(awk -F"=" '$1 == "CONFIG_LOCALVERSION" { print substr($2, 2, length($2)-2); end; }' .config)"
+  print -P "About to compile: %B${_ver}${_mod}%b"
+  if ! _contq 125; then
     return $?
   fi
 
-  if ! _stage -next "grub-mkconfig" -pre "_check_boot_writable" make install; then
+  if ! _stage -next "make"  make clean; then
     return $?
   fi
 
-  if ! _stage -next "module-rebuild" -pre "_check_boot_writable" -title "grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
+  if ! _stage -next "make modules_install" make; then
     return $?
   fi
 
-  if ! _stage emerge @module-rebuild; then
-    return $?
+  # }}}
+
+  # {{{ Installation Stages
+
+  if [[ -z $_noinst ]]; then
+
+    if ! _stage -next "make install" make modules_install; then
+      return $?
+    fi
+
+    if ! _stage -next "grub-mkconfig" -pre "_check_boot_writable" make install; then
+      return $?
+    fi
+
+    if ! _stage -next "module-rebuild" -pre "_check_boot_writable" -title "grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
+      return $?
+    fi
+
+    if ! _stage emerge @module-rebuild; then
+      return $?
+    fi
+
   fi
 
+  # }}}
+  
+  return 0
+}
+
+_ekrnlmk_main
+_rslt=$?
+if (( _rslt != 0 )); then
+  print -P "\n%B%F{red}==========%f $_me Error Happened! Exit Code: $_rslt %F{red}==========%f%b\n"
+  return $_ekrnlmk_rslt
 fi
 
 # }}}
