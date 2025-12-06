@@ -57,12 +57,15 @@ function _stage() {
   local __title
   local __next
   local __rslt
+  local __start __end __elapsed
+
   zmodload zsh/zutil
   zparseopts -D -E -A __opts -- title: pre: next:
   __title="${__opts[-title]}"
   __pre="${__opts[-pre]}"
   __next="${__opts[-next]}"
   __args=( "$@" )
+
   print -P "\n%B%F{cyan}###%f ${__title:=${__args[*]}} %F{green}${(l:50::=:)}%f%b\n"
   if [[ $__pre ]]; then
     $__pre
@@ -71,13 +74,18 @@ function _stage() {
       return $__rslt
     fi
   fi
+
+  printf -v __start '%.0f' $(( EPOCHREALTIME * 1000 ))
   $_subex "${__args[@]}"
   __rslt=$?
+  printf -v __end '%.0f' $(( EPOCHREALTIME * 1000 ))
+  __elapsed=$(( __end - __start ))
+
   if [[ $__rslt != 0 ]]; then
     print -P "%B%F{red}ERROR:${__rslt}%f - ekrnlmk aborted!%b\n"
     return $__rslt
   fi
-  print -P "\n%B%F{green}----------%f %F{cyan}${__title}%f finished on %D{%Y-%m-%d %H:%M}"
+  print -P "\n%B%F{green}----------%f %F{cyan}${__title}%f finished after ${__elapsed::-3}.${__elapsed: -3}s on %D{%Y-%m-%d %H:%M}"
   if [[ $__next ]]; then
     print -P "Next stage: %F{cyan}${__next}%f%b"
   fi
