@@ -72,6 +72,7 @@ Commands with `!` have only one variant
 **[1]** These commands have only one variant.  
 **[2]** Unlike other commands that append your arguments to the end, these commands INSERT your arguments within, at the position marked with the `[OPTIONS]` notation.
 
+
 ### The `ekrnl` command:
 
 * WithOUT `!`, it will execute `eselect kernel list`, a non-privileged command
@@ -89,6 +90,7 @@ for the currently selected kernel, after checking for the following pre-requisit
 * The `.config` file exists in the above directory
 
 If the above pre-requisites are not met, it will ask for confirmation and suggest possible fixes.
+
 
 ### The `ekrnlmk!` command:
 
