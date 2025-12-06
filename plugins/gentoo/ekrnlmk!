@@ -85,9 +85,9 @@ function _stage() {
     print -P "%B%F{red}ERROR:${__rslt}%f - ekrnlmk aborted!%b\n"
     return $__rslt
   fi
-  print -Pn     "\n%B%F{green}----------%f %F{cyan}${__title}%f finished after "
-  print "%'.3f" "$(( __elapsed / 1000.0 ))"
-  print -P      "s on %D{%Y-%m-%d %H:%M}"
+  print  -Pn     "\n%B%F{green}----------%f %F{cyan}${__title}%f finished after "
+  printf "%'.3f" "$(( __elapsed / 1000.0 ))"
+  print  -P      "s on %D{%Y-%m-%d %H:%M}"
   if [[ $__next ]]; then
     print -P "Next stage: %F{cyan}${__next}%f%b"
   fi
