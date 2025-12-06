@@ -117,11 +117,15 @@ function 'enewsr!'() {
   gsubex eselect news read
 }
 
+function ekrnl() {
+  eselect kernel list
+}
+
 function 'ekrnl!'() {
   if [[ $1 ]]; then
     gsubex eselect kernel set $1
   else
-    eselect kernel list
+    ekrnl
   fi
 }
 
