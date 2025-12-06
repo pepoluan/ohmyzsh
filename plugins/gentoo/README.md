@@ -100,3 +100,59 @@ It supports several options/switches, which you can read by running `ekrnlmk! --
 The most helpful one is probably `--no-clean` which skips the `make clean` stage,
 helpful if you only do minor config changes to currently-selected kernel, as it reuses
 previously-compiled code, and only compile what needs to change.
+
+
+## Common Usage Flow
+
+### Updating packages and kernel
+
+```sh
+# First we sync the repo -- please do this only ONCE PER DAY, or you might get blocked!
+emsync!
+
+# Oh, a Gentoo News! Let's read it
+enewsr!
+
+# Let's review what's changed
+emupw
+
+# We see new USE flags. After editing our USE flags in /etc/portage/package.use as necessary, let's (re)compile them
+# But review first:
+emch
+
+# Now we execute the changes
+emch!
+
+# Oh, some config changed
+edconf!
+
+# That done, let's review again what Portage suggests:
+emupw
+
+# Everything's good, let's update the world!
+emupw!
+
+# Config changes again
+edconf!
+
+# Cleanup obsoleted packages, but review first
+emcln
+emcln!
+
+# If the cleanup bollixed some libs, rebuild them:
+empresreb!
+
+# Apparently we have a new kernel. Let's see and select it:
+ekrnl
+ekrnl! 4  # Assuming it's kernel number 4 in the list
+
+# Preparation for configuring the new kernel
+chown -vR my_user:my_group /usr/src/linux /usr/src/linux/*
+zcat /proc/config.gz > /usr/src/linux/.config
+
+# Let's configure the kernel
+ekrnlc
+
+# Now let's make and install the kernel
+ekrnlmk!
+```
