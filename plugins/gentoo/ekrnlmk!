@@ -120,16 +120,24 @@ function _check_boot_writable() {
   return 0
 }
 
+local _prevautotitle="$DISABLE_AUTO_TITLE"
+DISABLE_AUTO_TITLE="true"
+
 function _cleanup() {
   local __rslt=$?
-  unset _me _ver _mod _rslt _nopause _noclean _noinst _subex
+  if [[ $_prevautotitle ]]; then
+    DISABLE_AUTO_TITLE="$_prevautotitle"
+  else
+    unset DISABLE_AUTO_TITLE
+  fi
+  unset _me _ver _mod _rslt _nopause _noclean _noinst _subex _prevautotitle
   unfunction _print_help _contq _stage _check_boot_writable _cleanup _ekrnlmk_main
   popd -q
-  trap - EXIT
+  trap - EXIT INT
   return $__rslt
 }
 
-trap _cleanup EXIT
+trap _cleanup EXIT INT
 
 # }}}
 
