@@ -66,7 +66,7 @@ function 'emup!'() {
     _err_need_pkgs "$0"
     return 1
   fi
-  gsubex emerge -1v --update --deep "$@"
+  gsubex emerge -v --update --deep "$@"
 }
 
 function emupw() {
