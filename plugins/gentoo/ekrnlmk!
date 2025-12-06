@@ -55,11 +55,13 @@ function _stage() {
   local __args=()
   local __pre
   local __title
+  local __next
   local __rslt
   zmodload zsh/zutil
-  zparseopts -D -E -A __opts -- title: pre:
+  zparseopts -D -E -A __opts -- title: pre: next:
   __title="${__opts[-title]}"
   __pre="${__opts[-pre]}"
+  __next="${__opts[-next]}"
   __args=( "$@" )
   print -P "\n%B%F{cyan}###%f ${__title:=${__args[*]}} %F{green}${(l:50::=:)}%f%b\n"
   if [[ $__pre ]]; then
@@ -76,6 +78,9 @@ function _stage() {
     return $__rslt
   fi
   print -P "\n%B%F{green}----------%f %F{cyan}${__title}%f finished on %D{%Y-%m-%d %H:%M}"
+  if [[ $__next ]]; then
+    print -P "Next stage: %F{cyan}${__next}%f%b"
+  fi
   if [[ -z $_nopause ]]; then
     if ! _contq; then
       print -P "%B%F{yellow}ekrnlmk aborted by user.%f%b\n"
@@ -165,11 +170,11 @@ if ! _contq 125; then
   return $?
 fi
 
-if ! _stage make clean; then
+if ! _stage -next "make"  make clean; then
   return $?
 fi
 
-if ! _stage make; then
+if ! _stage -next "make modules_install" make; then
   return $?
 fi
 
@@ -179,15 +184,15 @@ fi
 
 if [[ -z $_noinst ]]; then
 
-  if ! _stage make modules_install; then
+  if ! _stage -next "make install" make modules_install; then
     return $?
   fi
 
-  if ! _stage -pre "_check_boot_writable" make install; then
+  if ! _stage -next "grub-mkconfig" -pre "_check_boot_writable" make install; then
     return $?
   fi
 
-  if ! _stage -pre "_check_boot_writable" -title "grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
+  if ! _stage -next "module-rebuild" -pre "_check_boot_writable" -title "grub-mkconfig" grub-mkconfig -o /boot/grub/grub.cfg; then
     return $?
   fi
 
