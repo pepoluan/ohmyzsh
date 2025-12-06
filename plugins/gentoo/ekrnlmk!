@@ -99,16 +99,22 @@ function _stage() {
 }
 
 function _check_boot_writable() {
-  local __tmp="$($_subex mktemp -p /boot 2> /dev/null)"
-  if [[ $? != 0 || -z $__tmp ]]; then
-    print -P "%B%F{yellow}WARNING: /boot is not writable!%f"
-    if ! _contq; then
-      return 13  # EACCESS
+  local __tmp __repeat
+  __repeat="1"
+  while [[ $__repeat ]]; do
+    __tmp="$($_subex mktemp -p /boot 2> /dev/null)"
+    if [[ $? != 0 || -z $__tmp ]]; then
+      __repeat="1"
+      print -P "%B%F{yellow}WARNING: /boot is not writable!%f"
+      if ! _contq; then
+        return 13  # EACCESS
+      fi
+      print -P "%bRetesting..."
+    else
+      __repeat=""
+      $_subex rm "$__tmp"
     fi
-    print -P "%b"
-  else
-    $_subex rm "$__tmp"
-  fi
+  done
   return 0
 }
 
